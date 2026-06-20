@@ -26,6 +26,15 @@ func (c *CardMessage) Text(format string, args ...interface{}) *CardMessage {
 	if len(args) > 0 {
 		content = fmt.Sprintf(format, args...)
 	}
+
+	// 如果上一个元素也是 markdown，合并进去，避免多余间距
+	if len(c.elements) > 0 {
+		if last, ok := c.elements[len(c.elements)-1].(map[string]string); ok && last["tag"] == "markdown" {
+			last["content"] += "\n" + content
+			return c
+		}
+	}
+
 	c.elements = append(c.elements, map[string]string{
 		"tag": "markdown", "content": content,
 	})
