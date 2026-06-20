@@ -44,6 +44,6 @@ func (c *Client) Send(msg Message) error {
 	return nil
 }
 
-func (c *Client) SendText(format string, args ...interface{}) error {
+func (c *Client) SendText(format string, args ...any) error {
 	return c.Send(NewText(format, args...))
 }

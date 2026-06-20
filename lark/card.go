@@ -4,7 +4,7 @@ import "fmt"
 
 type CardMessage struct {
 	header   *cardHeader
-	elements []interface{}
+	elements []any
 }
 
 type cardHeader struct {
@@ -13,7 +13,7 @@ type cardHeader struct {
 }
 
 func NewCard() *CardMessage {
-	return &CardMessage{elements: make([]interface{}, 0)}
+	return &CardMessage{elements: make([]any, 0)}
 }
 
 func (c *CardMessage) Title(title string, color Color) *CardMessage {
@@ -21,13 +21,12 @@ func (c *CardMessage) Title(title string, color Color) *CardMessage {
 	return c
 }
 
-func (c *CardMessage) Text(format string, args ...interface{}) *CardMessage {
+func (c *CardMessage) Text(format string, args ...any) *CardMessage {
 	content := format
 	if len(args) > 0 {
 		content = fmt.Sprintf(format, args...)
 	}
 
-	// 如果上一个元素也是 markdown，合并进去，避免多余间距
 	if len(c.elements) > 0 {
 		if last, ok := c.elements[len(c.elements)-1].(map[string]string); ok && last["tag"] == "markdown" {
 			last["content"] += "\n" + content
@@ -58,9 +57,9 @@ func (c *CardMessage) HR() *CardMessage {
 }
 
 func (c *CardMessage) Button(text, url string) *CardMessage {
-	c.elements = append(c.elements, map[string]interface{}{
+	c.elements = append(c.elements, map[string]any{
 		"tag": "action",
-		"actions": []map[string]interface{}{{
+		"actions": []map[string]any{{
 			"tag":  "button",
 			"text": map[string]string{"tag": "plain_text", "content": text},
 			"url":  url, "type": "default",
@@ -69,12 +68,12 @@ func (c *CardMessage) Button(text, url string) *CardMessage {
 	return c
 }
 
-func (c *CardMessage) Note(format string, args ...interface{}) *CardMessage {
+func (c *CardMessage) Note(format string, args ...any) *CardMessage {
 	content := format
 	if len(args) > 0 {
 		content = fmt.Sprintf(format, args...)
 	}
-	c.elements = append(c.elements, map[string]interface{}{
+	c.elements = append(c.elements, map[string]any{
 		"tag":      "note",
 		"elements": []map[string]string{{"tag": "plain_text", "content": content}},
 	})
@@ -83,13 +82,13 @@ func (c *CardMessage) Note(format string, args ...interface{}) *CardMessage {
 
 func (c *CardMessage) MsgType() string { return "interactive" }
 
-func (c *CardMessage) Build() interface{} {
-	card := map[string]interface{}{"elements": c.elements}
+func (c *CardMessage) Build() any {
+	card := map[string]any{"elements": c.elements}
 	if c.header != nil {
-		card["header"] = map[string]interface{}{
+		card["header"] = map[string]any{
 			"title":    map[string]string{"tag": "plain_text", "content": c.header.Title},
 			"template": string(c.header.Color),
 		}
 	}
-	return map[string]interface{}{"msg_type": "interactive", "card": card}
+	return map[string]any{"msg_type": "interactive", "card": card}
 }
